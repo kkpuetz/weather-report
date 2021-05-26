@@ -10,21 +10,21 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_lambda_function" "example" {
-  function_name = "getWeatherData2"
+resource "aws_lambda_function" "getWeatherDataLambda" {
+  function_name = "getWeatherData"
 
   s3_bucket = "weather-data-puetz"
-  s3_key    = "v1.0.0/getWeatherData.zip"
+  s3_key    = "v1.0.0/getWeatherData/index.zip"
 
   handler = "main.handler"
   runtime = "nodejs14.x"
 
-  role = aws_iam_role.lambda_exec.arn
+  role = aws_iam_role.getWeatherDataLambdaIAM.arn
 }
 
 //need to add dynamodb Get access policy
-resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_example_lambda"
+resource "aws_iam_role" "getWeatherDataLambdaIAM" {
+  name = "getWeatherData"
 
   assume_role_policy = <<EOF
 {
@@ -44,21 +44,21 @@ EOF
 
 }
 
-resource "aws_lambda_function" "example2" {
-  function_name = "putWeatherData2"
+resource "aws_lambda_function" "putWeatherDataLambda" {
+  function_name = "putWeatherData"
 
   s3_bucket = "weather-data-puetz"
-  s3_key    = "v1.0.0/putWeatherData.zip"
+  s3_key    = "v1.0.0/putWeatherData/index.zip"
 
   handler = "main.handler"
   runtime = "nodejs14.x"
 
-  role = aws_iam_role.lambda_exec.arn
+  role = aws_iam_role.putWeatherDataLambdaIAM.arn
 }
 
 //need to add dynamodb Get access policy
-resource "aws_iam_role" "lambda_exec2" {
-  name = "serverless_example_lambda2"
+resource "aws_iam_role" "putWeatherDataLambdaIAM" {
+  name = "putWeatherData"
 
   assume_role_policy = <<EOF
 {
@@ -76,5 +76,17 @@ resource "aws_iam_role" "lambda_exec2" {
 }
 EOF
 
+}
+
+resource "aws_dynamodb_table" "weatherTable" {
+  name     = "Weather"
+  hash_key = "id"
+  write_capacity = "5"
+  read_capacity = "5"
+
+  attribute {
+    name = "id"
+    type = "N"
+  }
 }
 
